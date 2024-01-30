@@ -7,21 +7,106 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
+	"time"
 )
 
-const getProducts = `-- name: GetProducts :many
-SELECT id, code, name, image_url, price, description, active, category_id, created_at, updated_at, deleted_at FROM products
+const createProduct = `-- name: CreateProduct :exec
+INSERT INTO products ("id","code","name","image_url","price","description","active","category_id") VALUES($1, $2, $3, $4, $5, $6, $7, $8)
 `
 
-func (q *Queries) GetProducts(ctx context.Context) ([]Product, error) {
-	rows, err := q.db.QueryContext(ctx, getProducts)
+type CreateProductParams struct {
+	ID          string
+	Code        sql.NullString
+	Name        string
+	ImageUrl    sql.NullString
+	Price       int32
+	Description sql.NullString
+	Active      sql.NullBool
+	CategoryID  sql.NullString
+}
+
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) error {
+	_, err := q.db.ExecContext(ctx, createProduct,
+		arg.ID,
+		arg.Code,
+		arg.Name,
+		arg.ImageUrl,
+		arg.Price,
+		arg.Description,
+		arg.Active,
+		arg.CategoryID,
+	)
+	return err
+}
+
+const getProductByID = `-- name: GetProductByID :one
+SELECT products.id, products.code, products.name, products.image_url, products.price, products.description, products.active, products.category_id, products.created_at, products.updated_at, products.deleted_at, categories.name as category_name FROM products join categories on products.category_id = categories.id WHERE products.id = $1
+`
+
+type GetProductByIDRow struct {
+	ID           string
+	Code         sql.NullString
+	Name         string
+	ImageUrl     sql.NullString
+	Price        int32
+	Description  sql.NullString
+	Active       sql.NullBool
+	CategoryID   sql.NullString
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    sql.NullTime
+	CategoryName string
+}
+
+func (q *Queries) GetProductByID(ctx context.Context, id string) (GetProductByIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getProductByID, id)
+	var i GetProductByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.Code,
+		&i.Name,
+		&i.ImageUrl,
+		&i.Price,
+		&i.Description,
+		&i.Active,
+		&i.CategoryID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.CategoryName,
+	)
+	return i, err
+}
+
+const getProducts = `-- name: GetProducts :many
+select products.id, products.code, products.name, products.image_url, products.price, products.description, products.active, products.category_id, products.created_at, products.updated_at, products.deleted_at, categories.name as category_name from products join categories on products.category_id = categories.id limit $1
+`
+
+type GetProductsRow struct {
+	ID           string
+	Code         sql.NullString
+	Name         string
+	ImageUrl     sql.NullString
+	Price        int32
+	Description  sql.NullString
+	Active       sql.NullBool
+	CategoryID   sql.NullString
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    sql.NullTime
+	CategoryName string
+}
+
+func (q *Queries) GetProducts(ctx context.Context, limit int32) ([]GetProductsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getProducts, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Product
+	var items []GetProductsRow
 	for rows.Next() {
-		var i Product
+		var i GetProductsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Code,
@@ -34,6 +119,7 @@ func (q *Queries) GetProducts(ctx context.Context) ([]Product, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
+			&i.CategoryName,
 		); err != nil {
 			return nil, err
 		}

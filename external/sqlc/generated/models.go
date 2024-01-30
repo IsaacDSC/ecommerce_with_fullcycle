@@ -23,7 +23,7 @@ type Product struct {
 	Code        sql.NullString
 	Name        string
 	ImageUrl    sql.NullString
-	Price       string
+	Price       int32
 	Description sql.NullString
 	Active      sql.NullBool
 	CategoryID  sql.NullString

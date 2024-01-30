@@ -6,29 +6,85 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/IsaacDSC/fullcycle_catalog_ecommerce/graph/model"
 )
 
 // CreateProduct is the resolver for the createProduct field.
-func (r *mutationResolver) CreateProduct(ctx context.Context, input model.NewProduct) (*model.Product, error) {
-	panic(fmt.Errorf("not implemented: CreateProduct - createProduct"))
+func (r *mutationResolver) CreateProduct(ctx context.Context, input model.NewProduct) (output *model.Product, err error) {
+	product := input.ToDomain()
+	product, err = r.Repositories.ProductRepository.CreateProduct(ctx, product)
+	if err != nil {
+		err = errors.New("Internal server error")
+	}
+	prodModel := new(model.Product)
+	output = prodModel.FromDomain(product)
+	return
 }
 
 // CreateCategory is the resolver for the createCategory field.
-func (r *mutationResolver) CreateCategory(ctx context.Context, input model.NewCategory) (*model.Category, error) {
-	panic(fmt.Errorf("not implemented: CreateCategory - createCategory"))
+func (r *mutationResolver) CreateCategory(ctx context.Context, input model.NewCategory) (output *model.Category, err error) {
+	category := input.ToDomain()
+	err = r.Repositories.CategoryRepository.CreateCategory(ctx, category)
+	if err != nil {
+		return
+	}
+	categoryModel := new(model.Category)
+	output = categoryModel.FromDomain(category)
+	return
 }
 
 // Products is the resolver for the products field.
-func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
-	panic(fmt.Errorf("not implemented: Products - products"))
+func (r *queryResolver) Products(ctx context.Context) (output []*model.Product, err error) {
+	products, err := r.Repositories.ProductRepository.GetProducts(ctx)
+	if err != nil {
+		err = errors.New("Internal server error")
+	}
+
+	prodModel := new(model.Product)
+	for i := range products {
+		output = append(output, prodModel.FromDomain(products[i]))
+	}
+
+	return
 }
 
 // Categories is the resolver for the categories field.
-func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, error) {
-	panic(fmt.Errorf("not implemented: Categories - categories"))
+func (r *queryResolver) Categories(ctx context.Context) (output []*model.Category, err error) {
+	categories, err := r.Repositories.CategoryRepository.GetAllCategories(ctx)
+	if err != nil {
+		err = errors.New("Internal server error")
+		return
+	}
+
+	categoryModel := new(model.Category)
+	for i := range categories {
+		output = append(output, categoryModel.FromDomain(categories[i]))
+	}
+	return
+}
+
+// GetProduct is the resolver for the getProduct field.
+func (r *queryResolver) GetProduct(ctx context.Context, input *model.RetrieveByID) (output *model.Product, err error) {
+	product, err := r.Repositories.ProductRepository.GetProductByID(ctx, input.ID)
+	if err != nil {
+		return
+	}
+	prodModel := new(model.Product)
+	output = prodModel.FromDomain(product)
+	return
+}
+
+// GetCategory is the resolver for the getCategory field.
+func (r *queryResolver) GetCategory(ctx context.Context, input *model.RetrieveByID) (output *model.Category, err error) {
+	category, err := r.Repositories.CategoryRepository.GetCategoryByID(ctx, input.ID)
+	if err != nil {
+		return
+	}
+	categoryModel := new(model.Category)
+	output = categoryModel.FromDomain(category)
+	return
 }
 
 // Mutation returns MutationResolver implementation.

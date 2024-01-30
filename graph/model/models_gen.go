@@ -18,22 +18,27 @@ type NewProduct struct {
 	Code        *string `json:"code,omitempty"`
 	Name        string  `json:"name"`
 	ImageURL    string  `json:"imageUrl"`
-	Price       float64 `json:"price"`
+	Price       int     `json:"price"`
 	Description *string `json:"description,omitempty"`
 	Active      bool    `json:"active"`
 	CategoryID  string  `json:"categoryId"`
 }
 
 type Product struct {
-	ID          string  `json:"id"`
-	Code        *string `json:"code,omitempty"`
-	Name        string  `json:"name"`
-	ImageURL    string  `json:"imageUrl"`
-	Price       float64 `json:"price"`
-	Description *string `json:"description,omitempty"`
-	Active      bool    `json:"active"`
-	CategoryID  string  `json:"categoryId"`
+	ID          string    `json:"id"`
+	Code        *string   `json:"code,omitempty"`
+	Name        string    `json:"name"`
+	ImageURL    string    `json:"imageUrl"`
+	Price       int       `json:"price"`
+	Description *string   `json:"description,omitempty"`
+	Active      bool      `json:"active"`
+	CategoryID  string    `json:"categoryId"`
+	Category    *Category `json:"Category,omitempty"`
 }
 
 type Query struct {
+}
+
+type RetrieveByID struct {
+	ID string `json:"ID"`
 }

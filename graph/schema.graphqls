@@ -7,10 +7,11 @@ type Product {
   code: String
   name: String!
   imageUrl: String!
-  price: Float!
+  price: Int!
   description: String
   active: Boolean!
   categoryId: ID!
+  Category: Category
 }
 
 type Category {
@@ -22,7 +23,7 @@ input NewProduct {
   code: String
   name: String!
   imageUrl: String!
-  price: Float!
+  price: Int!
   description: String
   active: Boolean!
   categoryId: ID!
@@ -32,9 +33,15 @@ input NewCategory {
     name: String!
 }
 
+input RetrieveByID{
+  ID: ID!
+}
+
 type Query {
   products: [Product!]!
   categories: [Category!]!
+  getProduct(input: RetrieveByID): Product!
+  getCategory(input: RetrieveByID): Category!
 }
 
 type Mutation {

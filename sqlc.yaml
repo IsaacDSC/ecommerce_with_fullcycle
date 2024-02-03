@@ -4,6 +4,7 @@ sql:
     queries: 
       - "./external/sqlc/queries/products.sql"
       - "./external/sqlc/queries/categories.sql"
+      - "./external/sqlc/queries/orders.sql"
     schema: "./external/sqlc/schema.sql"
     gen:
       go:

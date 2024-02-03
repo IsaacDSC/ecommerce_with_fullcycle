@@ -18,6 +18,41 @@ type Category struct {
 	DeletedAt sql.NullTime
 }
 
+type Delivery struct {
+	ID            string
+	CEP           string
+	Address       sql.NullString
+	Number        sql.NullString
+	Country       sql.NullString
+	District      sql.NullString
+	City          sql.NullString
+	DeliveryPrice int32
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     sql.NullTime
+}
+
+type Order struct {
+	ID         string
+	TotalPrice int32
+	DeliveryID string
+	Status     string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  sql.NullTime
+}
+
+type OrderItem struct {
+	ID           string
+	ProductID    string
+	Quantity     int32
+	ProductPrice int32
+	OrderID      string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    sql.NullTime
+}
+
 type Product struct {
 	ID          string
 	Code        sql.NullString

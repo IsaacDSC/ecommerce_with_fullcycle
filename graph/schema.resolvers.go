@@ -7,6 +7,8 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/IsaacDSC/fullcycle_catalog_ecommerce/graph/model"
 )
@@ -32,6 +34,42 @@ func (r *mutationResolver) CreateCategory(ctx context.Context, input model.NewCa
 	}
 	categoryModel := new(model.Category)
 	output = categoryModel.FromDomain(category)
+	return
+}
+
+// CreateOrder is the resolver for the createOrder field.
+func (r *mutationResolver) CreateOrder(ctx context.Context, input model.NewOrder) (output *model.Order, err error) {
+	if len(input.Items) < 1 {
+		return &model.Order{}, errors.New("Required Items")
+	}
+
+	productsID := make([]string, len(input.Items))
+	for i := range input.Items {
+		productsID[i] = input.Items[i].ProductID
+	}
+
+	products, err := r.Repositories.OrderRepository.GetProducts(ctx, productsID)
+	if err != nil {
+		return &model.Order{}, err
+	}
+
+	for i := range products {
+		if !products[i].Active || (products[i].DeletedAt == time.Time{}) {
+			return &model.Order{}, fmt.Errorf("Product not unavailable: %s", products[i].ID)
+		}
+	}
+
+	domainEntity := input.ToDomain(products)
+	if err = domainEntity.Calculate(); err != nil {
+		return &model.Order{}, err
+	}
+
+	if err = r.Repositories.OrderRepository.CreateOrder(ctx, *domainEntity); err != nil {
+		return &model.Order{}, err
+	}
+
+	output.PaymentURL = fmt.Sprintf("http://loalhost:3000/payments/%s", domainEntity.ID)
+
 	return
 }
 

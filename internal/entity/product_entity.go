@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 type Product struct {
 	ID           string
 	Code         string
@@ -10,4 +12,5 @@ type Product struct {
 	Active       bool
 	CategoryID   string
 	CategoryName string
+	DeletedAt    time.Time
 }

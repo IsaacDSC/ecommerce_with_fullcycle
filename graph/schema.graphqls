@@ -19,6 +19,10 @@ type Category {
   name: String!
 }
 
+type Order {
+  paymentUrl: String!
+}
+
 input NewProduct {
   code: String
   name: String!
@@ -30,10 +34,30 @@ input NewProduct {
 }
 
 input NewCategory {
-    name: String!
+  name: String!
 }
 
-input RetrieveByID{
+input NewItems {
+  productId: ID!
+  quantity: Int!
+}
+
+input NewDelivery {
+  CEP: String!
+  address: String!
+  number: String!
+  country: String!
+  city: String!
+  district: String!
+}
+
+input NewOrder {
+  items: [NewItems]!
+  delivery: NewDelivery!
+  userId: ID!
+}
+
+input RetrieveByID {
   ID: ID!
 }
 
@@ -47,4 +71,5 @@ type Query {
 type Mutation {
   createProduct(input: NewProduct!): Product!
   createCategory(input: NewCategory!): Category!
+  createOrder(input: NewOrder!): Order!
 }
